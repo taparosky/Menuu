@@ -1,0 +1,60 @@
+﻿@model CartViewModel
+
+<div class="container">
+<div class="row">
+
+    <div>
+        <h4> Your cart: </h4>
+    </div>
+
+    <table class="table table-bordered table-striped">
+
+        <thead>
+            <tr>
+                <th>Quantity</th>
+                <th>Snack</th>
+                <th class="text-right">Price</th>
+                <th class="text-right">Total</th>
+                <th></th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach(var item in Model.Cart.CartItems)
+            {
+                <tr>
+                    <td class="text-center">@item.Quantity</td>
+                    <td class="text-center">@item.Snack.SnackName</td>
+                    <td class="text-center">@item.Snack.Price</td>
+                    <td>
+                        @(item.Quantity * item.Snack.Price)
+                    </td>
+                    <td class="text-center">
+                        <a asp-controller="Cart" asp-action="RemoveItemFromCart"
+                            asp-route-snackId="@item.Snack.SnackId"><img src="~/img/trash-can.png" width="20px" height="20px"/>
+                        </a>
+                    </td>
+                </tr>        
+            }
+        </tbody>
+
+        <tfoot>
+            <tr>
+                <td colspan="3" class="text-right">Total: </td>
+                <td class="text-right">
+                    @Model.CartTotal
+                </td>
+            </tr>
+        </tfoot>
+     </table>
+
+        <div class="text-right">
+            <div class="btn-group">
+                <a class="btn btn-success" asp-controller="Order" asp-action="Checkout"> Finish Order </a>
+                 &nbsp;&nbsp;&nbsp;
+                 <a class="btn btn-primary" asp-controller="Snack" asp-action="List"> Keep Buying </a>
+            </div>
+        </div>
+  
+</div>
+</div>
