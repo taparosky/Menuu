@@ -2,6 +2,7 @@
 using Menuu.Models;
 using Menuu.Repositories;
 using Menuu.Repositories.Interfaces;
+using Menuu.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 namespace Menuu;
@@ -37,6 +38,16 @@ public class Startup
         services.AddTransient<ISnackRepository, SnackRepository>();
         services.AddTransient<ICategoryRepository, CategoryRepository>();
         services.AddTransient<IOrderRepository, OrderRepository>();
+        services.AddScoped<ISeedUserRoleInitial, SeedUserRoleInitial>();
+
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("Admin",
+                politic =>
+                {
+                    politic.RequireRole("Admin");
+                });
+        });
 
         services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         services.AddScoped(sp => Cart.GetCart(sp));
@@ -48,7 +59,7 @@ public class Startup
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ISeedUserRoleInitial seedUserRoleInitial)
     {
         if (env.IsDevelopment())
         {
@@ -64,6 +75,10 @@ public class Startup
         app.UseStaticFiles();
 
         app.UseRouting();
+
+        seedUserRoleInitial.SeedRoles();
+        seedUserRoleInitial.SeedUsers();
+
         app.UseSession();
 
         app.UseAuthentication();
@@ -71,6 +86,11 @@ public class Startup
 
         app.UseEndpoints(endpoints =>
         {
+            endpoints.MapControllerRoute(
+              name: "areas",
+              pattern: "{area:exists}/{controller=Admin}/{action=Index}/{id?}"
+            );
+
             endpoints.MapControllerRoute(
                 name: "categoryFilter",
                 pattern: "Snack/{action}/{category?}",
